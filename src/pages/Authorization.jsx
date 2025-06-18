@@ -1,13 +1,16 @@
 import React from "react";
-import AuthorizationForm from "../modules/AuthorizationForm/AuthorizationForm";
+import { Helmet } from "react-helmet";
+import AuthorizationForm from "../modules/AuthorizationForm";
 
 function Authorization() {
-    return (
-        <>
-        
-            <AuthorizationForm/>
-        </>
-    )
+  return (
+    <>
+      <Helmet>
+        <title>Авторизация</title>
+      </Helmet>
+      <AuthorizationForm />
+    </>
+  );
 }
 
 export default Authorization;

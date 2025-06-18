@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { CircularProgress, Typography, Box, Card, CardContent, CardMedia, Button, Rating } from "@mui/material";
+import { CircularProgress, Typography, Box } from "@mui/material";
 import useAllProducts from "../shared/Api/all-products";
 import SearchBar from "../shared/components/SearchBar";
+import ProductGrid from "../components/ProductGrid";
 
 const Home = () => {
   const [search, setSearch] = useState("");
   const [sortType, setSortType] = useState("");
   const { carts, loading, error } = useAllProducts();
-  
+
   const filteredProducts = carts.filter(({ title }) =>
     title.toLowerCase().includes(search.toLowerCase())
   );
@@ -38,26 +39,7 @@ const Home = () => {
       ) : error ? (
         <Typography color="error">{error}</Typography>
       ) : sortedProducts.length ? (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 2 }}>
-          {sortedProducts.map((product) => (
-            <Card key={product.id} sx={{ textAlign: "center", padding: "10px" }}>
-              <CardMedia
-                component="img"
-                height="180"
-                image={product.thumbnail || product.images[0]}
-                alt={product.title}
-                sx={{ objectFit: "contain" }}
-              />
-              <CardContent>
-                <Typography variant="h6">{product.title}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Цена: ${product.price}
-                </Typography>
-                <Rating name="read-only" value={product.rating} precision={0.5} readOnly sx={{ margin: "10px 0" }} />
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
+        <ProductGrid products={sortedProducts} />
       ) : (
         <Typography>Ничего не найдено</Typography>
       )}

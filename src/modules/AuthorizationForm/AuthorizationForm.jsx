@@ -3,57 +3,54 @@ import { useNavigate } from "react-router-dom";
 import { Container, TextField, Button, Paper, Typography, IconButton, InputAdornment } from "@mui/material";
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import loginData from "./AuthorizationData";
-import AlertToast from "../../shared/components/AlertToast"
+import loginData from "./AuthorizationData.js";
+import AlertToast from "../../shared/components/AlertToast";
 
 function AuthorizationForm() {
+    const navigate = useNavigate();
+
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState({ login: false, password: false });
+    const [error, setError] = useState({ login: "", password: "" });
+    const [toastOpen, setToastOpen] = useState(false);
+
+    const validateLogin = (value) => {
+        if (!value) return "Введите логин";
+        return "";
+    };
+    
+
+    const validatePassword = (value) => {
+        if (!value) return "Введите пароль";
+        if (value.length < 4) return "Пароль должен быть от 4 символов";
+        return "";
+    };
+
     const handleChange = (field, value) => {
         if (field === "login") {
             setLogin(value);
-            setError((prev) => ({ ...prev, login: false })); 
+            setError((prev) => ({ ...prev, login: validateLogin(value) }));
         } else {
             setPassword(value);
-            setError((prev) => ({ ...prev, password: false })); 
+            setError((prev) => ({ ...prev, password: validatePassword(value) }));
         }
     };
-    
-    const [toastOpen, setToastOpen] = useState(false);
-    
-    const navigate = useNavigate(); 
-    
+
     const clickHandler = () => { 
-        let isValid = true;
-    
-        if (!login) {
-            setError((prev) => ({ ...prev, login: true }));
-            isValid = false;
-        } else {
-            setError((prev) => ({ ...prev, login: false }));
+        const loginError = validateLogin(login);
+        const passwordError = validatePassword(password);
+
+        if (loginError || passwordError) {
+            setError({ login: loginError, password: passwordError });
+            return;
         }
 
-        if (!password) {
-            setError((prev) => ({ ...prev, password: true }));
-            isValid = false;
-        } else {
-            setError((prev) => ({ ...prev, password: false }));
-        }
+        const auth = loginData.some((d) => d.login === login && d.password === password);
+            console.log("loginData:", loginData);
+            console.log("Entered:", login, password);
 
-        if (isValid) {
-            const auth = loginData.some(
-                (d) => d.login === login && d.password === password  
-            );
-
-            if (auth) {
-                navigate("/home");
-            } else {
-                setError({ login: true, password: true });
-                setToastOpen(true);
-            }
-        }
+        auth ? navigate("/home") : setToastOpen(true);
     };
 
     return (
@@ -69,33 +66,30 @@ function AuthorizationForm() {
                     margin="normal"
                     value={login} 
                     onChange={(e) => handleChange("login", e.target.value)}
-                     error={error.login}
-                    helperText={error.login ? "Неверный логин или пароль" : ""}
-                    />
+                    error={Boolean(error.login)}
+                    helperText={error.login}
+                />
 
-                        <TextField
-                            fullWidth
-                            label="Пароль"
-                            type={showPassword ? "text" : "password"}
-                            variant="outlined"
-                            margin="normal"
-                            value={password}
-                            onChange={(e) => handleChange("password", e.target.value)}
-                            error={error.password}
-                            helperText={error.password ? "Неверный логин или пароль" : ""}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={() => setShowPassword((prev) => !prev)}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
+                <TextField
+                    fullWidth
+                    label="Пароль"
+                    type={showPassword ? "text" : "password"}
+                    variant="outlined"
+                    margin="normal"
+                    value={password}
+                    onChange={(e) => handleChange("password", e.target.value)}
+                    error={Boolean(error.password)}
+                    helperText={error.password}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
 
                 <Button 
                     fullWidth
